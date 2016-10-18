@@ -1,0 +1,219 @@
+<html>
+
+<body>
+
+	<div id="classLevels">
+		
+	</div>
+	<button id="addClass">+</button>
+
+	<br/><br/>
+
+	<div>
+		Int Mod: <input min = "-5" value="0" type="number" id="intMod"><br/>
+	</div>
+
+	<br/>
+
+
+	<h2>Skill Groups</h2>
+	Extra Skill Ranks that can be allocated anywhere: <span id="unallocatedIntBonus"></span><br/>
+	Skill Ranks Per Group: <span id="skillRanksPerCategory"></span><br/>
+	<div id="skillCategories">
+	
+	</div>
+	<button>+</button>
+
+
+</body>
+
+<script type="text/javascript" src = "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-beta1/jquery.min.js"></script>
+
+<script type="text/javascript">
+
+	$(function(){
+
+		var updateSkillRanksPerCategory = function(){
+
+			var total=0;
+
+			var firstSpan = $("#classLevels").find("span:first");
+
+			total+= firstSpan.find("input:last").val()*1.5;
+
+			$("#classLevels").find("span").each(
+				function(index,element){
+					total+= $(this).find("input:last").val()*.5 * $(this).find("input:first").val();
+				}
+			);
+
+			$("#skillRanksPerCategory").text(total);
+		};
+
+		var addClass = function () {
+			
+			$("#classLevels").append(
+				"<span>"+
+				"<input max='9999' min='1' value='1' type='number'>" +
+				" levels with " +
+				"<input max='9999' min='0' value='0' type='number'>" +
+				" skill ranks per level"+
+				"</span>"
+			).change(function(){
+				updateSkillRanksPerCategory();
+				updateUnallocatedIntBonus();
+			});
+
+			var span = $("#classLevels").find("span:last");
+
+			if($("#classLevels").find("span").length>1){
+				span.append(" <button>-</button>");
+
+				span.find("button").click(function(){
+					span.remove();
+					updateSkillRanksPerCategory();
+					updateUnallocatedIntBonus();
+				});
+
+			}
+
+			span.append("<br/>");
+
+		};
+
+		addClass();
+
+		$("#addClass").click(
+			function(){
+				addClass();
+				updateUnallocatedIntBonus();
+			}
+		);
+
+
+		var updateUnallocatedIntBonus= function (){
+
+			var totalHD = 0;
+			var intMod = $("#intMod").val();
+
+			$("#classLevels").find("span").each(
+				function(index,element){
+					totalHD-= -$(this).find("input:first").val();
+				}
+			);
+
+			$("#unallocatedIntBonus").text(intMod*(totalHD - -3));
+		};
+		
+		updateUnallocatedIntBonus();
+		updateSkillRanksPerCategory();
+
+		$("#intMod").change(
+			function(){
+				updateUnallocatedIntBonus();
+			}
+		);
+
+		var addCategory= function(categoryName){
+			
+			if (categoryName === undefined || categoryName === null) {
+ 			   categoryName = "";
+			}
+
+			$("#skillCategories").append(
+				"<div>"+
+					"<input value=" + categoryName + ">  Ranks spent in Group: " +"<span></span>"+
+					"<div style = 'margin-left : 1em'></div>"+
+					"<button style = 'margin-left : 1em'>+</button"+
+				"</div>"
+			);
+
+			var last = $("#skillCategories").find("div:last");
+
+			last.updateRanksSpentInCategory = function(){
+
+				var total = 0;
+
+				var parent=last.parent();
+
+				parent.find("input[type^='number']").each(
+					function(index,element){
+						total -= - $(this).val();
+					}
+				);
+
+				last.prev().text(total);
+			}
+
+			last.addSkill= function(skillName){
+
+				if (skillName === undefined || skillName === null) {
+	 			   skillName = "";
+				}				
+
+				last.append("<input value='"+skillName+"'> <input type='number' min='0' value='0'><br/>");
+				last.change(function(){
+					last.updateRanksSpentInCategory();
+				});
+			}
+
+			last[0].addSkill=last.addSkill;
+
+			last.next().click(
+				function(){
+					last.addSkill();
+				}
+			);
+
+			// var span = $("#classLevels").find("span:last")
+
+			// if($("#classLevels").find("span").length>1){
+			// 	span.append(" <button>-</button>")
+
+			// 	span.find("button").click(function(){span.remove()})
+			// }
+
+			// span.append("<br/>")
+					
+		}
+
+		$("#skillCategories").next().click(function(){
+			addCategory();
+		});
+
+		var groups =
+
+		[
+			["Perception" , ["Hide", "Move Silently", "Spot", "Listen", "Spellcraft", "Search", "Sense Motive"]],
+			["Knowledge" , ["Arcana"]],
+			["Skulduggery" , ["Sleight of Hand", "Use Rope", "Open Lock", "Disable Device", "Bluff", "Disguise"]],
+			["Interaction" , ["Sense Motive", "Diplomacy", "Gather Information", "Heal", "Intimidate", "Speak Language"]],
+			["Physical-Fitness" , ["Balance", "Concentration", "Climb", "Escape Artist", "Jump", "Ride", "Tumble", "Swim" ]],
+			["Wilderness" , ["Handle Animal", "Survival", "Ride", "Swim", "Climb", "Jump", "Heal" ]],
+			["Civilization" , ["Appraise", "Craft (something)", "Decipher Script", "Forgery", "Perform (Something)", "Profession (something)"]]
+		];
+
+		groups.forEach(
+			function(element, index, array){
+				addCategory(element[0]);
+
+				$("#skillCategories").find("input[value^='"+element[0]+"']").each(
+					function(index,element1){
+
+						element[1].forEach(
+							function(element2, index2, array2){
+								$(element1).parent().find("div")[0].addSkill(element2);
+							}
+						);
+					}
+				);
+			}
+		)
+
+
+
+	});
+
+</script>
+
+</html>
