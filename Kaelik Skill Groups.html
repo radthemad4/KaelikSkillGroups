@@ -301,6 +301,10 @@ var addSkillGroup = function (groupType, groupName) {
         row.style.marginLeft = '1em';
         var skillNameInput = document.createElement("input");
         var skillRanksInput = document.createElement("input");
+        var maxRanksButton = document.createElement("button");
+        var clearRanksButton = document.createElement("button");
+        maxRanksButton.innerText = "Max";
+        clearRanksButton.innerText = "Clear";
         skillRanksInput.type = "number";
         skillRanksInput.step = "1";
         skillRanksInput.min = "0";
@@ -309,12 +313,27 @@ var addSkillGroup = function (groupType, groupName) {
         skillNameInput.value = skillName;
         row.appendChild(skillNameInput);
         row.appendChild(skillRanksInput);
+        row.appendChild(maxRanksButton);
+        row.appendChild(clearRanksButton);
         skillGroups.push({
             skillNameInput: skillNameInput,
             skillRanksInput: skillRanksInput,
             skillGroupHeading: skillGroupHeading
         });
         rankCounters.push(skillRanksInput);
+
+        maxRanksButton.onclick = function () {
+            skillRanksInput.value = "" + (numberOfLevels + 3);
+            updateSkills();
+            updateTotalRanksInGroup();
+        }
+
+        clearRanksButton.onclick = function () {
+            skillRanksInput.value = "0";
+            updateSkills();
+            updateTotalRanksInGroup();
+        }
+
         row.oninput = function () {
             updateSkills();
             updateTotalRanksInGroup();
